@@ -1,50 +1,47 @@
-import { useEffect, useState } from "react";
-import "../styles/button.css";
+import { useState } from "react";
+import { FormButton, ToDoInput, RemoveButton, ToDoListItem } from "../styles/styles";
+import { useLocalStorage } from "../utils/useLocalStorage";
 
-function App() {
+function ToDo() {
   const [toDo, setToDo] = useState("");
-  const [toDos, setToDos] = useState(() => {
-    const savedToDos = JSON.parse(localStorage.getItem("toDos"));
-    return Array.isArray(savedToDos) ? savedToDos : [];
+  const [toDoList, setToDoList] = useState(() => {
+    const savedToDoList = JSON.parse(localStorage.getItem("toDoList"));
+    return savedToDoList ? savedToDoList : [];
   });
 
   const onChangeToDo = (event) => setToDo(event.target.value);
   const onSubmitToDo = (event) => {
     event.preventDefault();
-    if (toDo === "") return;
-    setToDos((currentToDos) => [toDo, ...currentToDos]);
+    if (toDo.trim() === "") return;
+    setToDoList((currentToDoList) => [toDo, ...currentToDoList]);
     setToDo("");
   };
-  const removeToDo = (removeIndex) => setToDos(toDos.filter((_, index) => index !== removeIndex));
+  const removeToDo = (removeIndex) =>
+    setToDoList(toDoList.filter((_, index) => index !== removeIndex));
 
-  useEffect(() => {
-    localStorage.setItem("toDos", JSON.stringify(toDos));
-  }, [toDos]);
+  useLocalStorage("toDoList", toDoList);
 
   return (
     <div>
-      <h1>😉 My To Dos ({toDos.length})</h1>
+      <h1>😉 My To-Do-List ({toDoList.length})</h1>
       <form onSubmit={onSubmitToDo}>
-        <input
-          className="toDo-form"
+        <ToDoInput
           onChange={onChangeToDo}
           type="text"
           value={toDo}
           placeholder="Write your to do..."
         />
-        <button className="toDo-form-button">Add To Do</button>
+        <FormButton>Add To Do</FormButton>
       </form>
       <hr />
-      {toDos.map((toDo, index) => (
-        <div className="toDo-list-item" key={index}>
-          <button className="remove-button" onClick={() => removeToDo(index)}>
-            X
-          </button>
+      {toDoList.map((toDo, index) => (
+        <ToDoListItem>
+          <RemoveButton onClick={() => removeToDo(index)}>X</RemoveButton>
           {toDo}
-        </div>
+        </ToDoListItem>
       ))}
     </div>
   );
 }
 
-export default App;
+export default ToDo;
